@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopSphere – Online Shopping Platform (LLD & HLD Practical Project)</title>
+  <meta name="description" content="A comprehensive, beginner-friendly Online Shopping Platform demonstrating Low-Level Design (LLD) CRUD and High-Level Design (HLD) Microservices Architecture with SQLite, In-Memory Cache, and Async Event Queue.">
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons for UI -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Top Global Header / Navigation Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand" id="brand-logo" onclick="app.navigateTo('store')">
+        <div class="brand-icon">
+          <i class="fa-solid fa-cube"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">ShopSphere</span>
+          <span class="brand-badge">LLD & HLD Demo</span>
+        </div>
+      </div>
+
+      <nav class="nav-links" id="main-navigation">
+        <button class="nav-btn active" data-tab="store" id="nav-tab-store" onclick="app.navigateTo('store')">
+          <i class="fa-solid fa-store"></i> <span>Storefront</span>
+        </button>
+        <button class="nav-btn" data-tab="crud" id="nav-tab-crud" onclick="app.navigateTo('crud')">
+          <i class="fa-solid fa-boxes-stacked"></i> <span>Product CRUD</span>
+        </button>
+        <button class="nav-btn" data-tab="cart" id="nav-tab-cart" onclick="app.navigateTo('cart')">
+          <i class="fa-solid fa-cart-shopping"></i> <span>Cart</span>
+          <span class="cart-badge-count" id="header-cart-badge">0</span>
+        </button>
+        <button class="nav-btn" data-tab="orders" id="nav-tab-orders" onclick="app.navigateTo('orders')">
+          <i class="fa-solid fa-truck-fast"></i> <span>Orders & Tracking</span>
+        </button>
+        <button class="nav-btn" data-tab="architecture" id="nav-tab-architecture" onclick="app.navigateTo('architecture')">
+          <i class="fa-solid fa-diagram-project"></i> <span>Architecture (HLD)</span>
+        </button>
+        <button class="nav-btn" data-tab="apidocs" id="nav-tab-apidocs" onclick="app.navigateTo('apidocs')">
+          <i class="fa-solid fa-code"></i> <span>API Docs & Testing</span>
+        </button>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-sm" id="btn-reset-demo" onclick="app.resetDemoData()" title="Reset Sample Database">
+          <i class="fa-solid fa-rotate-right"></i> <span>Reset DB</span>
+        </button>
+        <button class="btn btn-primary btn-sm" id="btn-open-cart-header" onclick="app.navigateTo('cart')">
+          <i class="fa-solid fa-bag-shopping"></i> <span id="header-cart-total">$0.00</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Telemetry / Live Dashboard Banner -->
+  <section class="metrics-banner" id="dashboard-metrics-bar">
+    <div class="metrics-container">
+      <div class="metric-card">
+        <div class="metric-icon blue"><i class="fa-solid fa-box-open"></i></div>
+        <div class="metric-info">
+          <span class="metric-label">Total Products</span>
+          <span class="metric-value" id="stat-products">--</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon purple"><i class="fa-solid fa-receipt"></i></div>
+        <div class="metric-info">
+          <span class="metric-label">Total Orders</span>
+          <span class="metric-value" id="stat-orders">--</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon green"><i class="fa-solid fa-dollar-sign"></i></div>
+        <div class="metric-info">
+          <span class="metric-label">Total Revenue</span>
+          <span class="metric-value" id="stat-revenue">--</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon cyan"><i class="fa-solid fa-bolt"></i></div>
+        <div class="metric-info">
+          <span class="metric-label">Cache Hit Ratio</span>
+          <span class="metric-value" id="stat-cache-ratio">--</span>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon amber"><i class="fa-solid fa-timeline"></i></div>
+        <div class="metric-info">
+          <span class="metric-label">Async Event Queue</span>
+          <span class="metric-value" id="stat-queue-status">Active</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main View Container -->
+  <main class="main-content" id="app-content-root">
+
+    <!-- ============================================== -->
+    <!-- TAB 1: STOREFRONT HOME                         -->
+    <!-- ============================================== -->
+    <section class="tab-pane active" id="pane-store">
+      <div class="store-hero">
+        <div class="hero-content">
+          <span class="hero-tag"><i class="fa-solid fa-microchip"></i> System Design Practical Project</span>
+          <h1 class="hero-title">Experience Modern E-Commerce Architecture</h1>
+          <p class="hero-subtitle">
+            Demonstrating Low-Level Design (REST CRUD, SQLite, Validation) & High-Level Design (API Gateway, In-Memory Caching, Async Event Messaging).
+          </p>
+        </div>
+      </div>
+
+      <!-- Search & Filters Toolbar -->
+      <div class="toolbar-card">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input 
+            type="text" 
+            id="store-search-input" 
+            placeholder="Search products by name or keywords..." 
+            oninput="app.handleSearch(this.value)"
+          >
+          <button class="clear-search-btn" id="btn-clear-search" onclick="app.clearSearch()" style="display: none;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="category-filters" id="category-filter-chips">
+          <button class="chip active" data-category="all" onclick="app.filterCategory('all')">All Products</button>
+          <button class="chip" data-category="Electronics" onclick="app.filterCategory('Electronics')">Electronics</button>
+          <button class="chip" data-category="Fashion" onclick="app.filterCategory('Fashion')">Fashion</button>
+          <button class="chip" data-category="Home & Kitchen" onclick="app.filterCategory('Home & Kitchen')">Home & Kitchen</button>
+          <button class="chip" data-category="Books" onclick="app.filterCategory('Books')">Books</button>
+          <button class="chip" data-category="Fitness" onclick="app.filterCategory('Fitness')">Fitness</button>
+        </div>
+
+        <div class="store-actions">
+          <button class="btn btn-primary" onclick="app.openProductModal()">
+            <i class="fa-solid fa-plus"></i> <span>Add Product</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cache Indicator Banner -->
+      <div class="cache-status-indicator" id="store-cache-indicator" style="display:none;">
+        <span class="badge" id="store-cache-badge"><i class="fa-solid fa-bolt"></i> CACHE HIT</span>
+        <span class="text" id="store-cache-text">Data served instantly from in-memory cache layer.</span>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="products-grid" id="products-grid-container">
+        <!-- Dynamically rendered product cards -->
+      </div>
+
+      <div class="empty-state" id="store-empty-state" style="display:none;">
+        <i class="fa-solid fa-box-open empty-icon"></i>
+        <h3>No products found</h3>
+        <p>Try refining your search keyword or selecting a different category filter.</p>
+        <button class="btn btn-secondary" onclick="app.clearSearch()">Clear Filters</button>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- TAB 2: PRODUCT CRUD MANAGEMENT (ROUND 2 LLD)   -->
+    <!-- ============================================== -->
+    <section class="tab-pane" id="pane-crud">
+      <div class="section-header-row">
+        <div>
+          <h2><i class="fa-solid fa-cubes"></i> Round 2: Product Management (LLD CRUD)</h2>
+          <p class="section-desc">Manage product catalog with real-time validation, SQLite persistence, and cache eviction.</p>
+        </div>
+        <button class="btn btn-primary" onclick="app.openProductModal()">
+          <i class="fa-solid fa-plus"></i> <span>Add New Product</span>
+        </button>
+      </div>
+
+      <div class="data-table-container">
+        <table class="data-table" id="products-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Image</th>
+              <th>Product Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock Status</th>
+              <th>Created At</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="products-table-body">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- TAB 3: SHOPPING CART & CHECKOUT                -->
+    <!-- ============================================== -->
+    <section class="tab-pane" id="pane-cart">
+      <div class="section-header-row">
+        <div>
+          <h2><i class="fa-solid fa-cart-shopping"></i> Shopping Cart & Checkout</h2>
+          <p class="section-desc">Live inventory verification, atomic price computation, and simulated checkout flow.</p>
+        </div>
+        <button class="btn btn-outline-danger btn-sm" id="btn-clear-cart" onclick="app.clearCart()">
+          <i class="fa-solid fa-trash-can"></i> <span>Clear Cart</span>
+        </button>
+      </div>
+
+      <div class="cart-layout" id="cart-content-layout">
+        <!-- Cart Items Column -->
+        <div class="cart-items-column">
+          <div class="card p-0" id="cart-items-card">
+            <div class="cart-items-list" id="cart-items-list-container">
+              <!-- Dynamically populated items -->
+            </div>
+            <div class="empty-state p-4" id="cart-empty-state" style="display:none;">
+              <i class="fa-solid fa-cart-arrow-down empty-icon"></i>
+              <h3>Your cart is empty</h3>
+              <p>Explore our catalog to add products to your shopping bag.</p>
+              <button class="btn btn-primary mt-2" onclick="app.navigateTo('store')">
+                <i class="fa-solid fa-store"></i> Browse Products
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Checkout Form & Order Summary Column -->
+        <div class="checkout-summary-column">
+          <!-- Summary Box -->
+          <div class="card summary-card">
+            <h3 class="card-title"><i class="fa-solid fa-receipt"></i> Order Summary</h3>
+            <div class="summary-line">
+              <span>Items Subtotal:</span>
+              <strong id="cart-subtotal">$0.00</strong>
+            </div>
+            <div class="summary-line">
+              <span>Estimated Tax (8%):</span>
+              <strong id="cart-tax">$0.00</strong>
+            </div>
+            <div class="summary-line">
+              <span>Standard Shipping:</span>
+              <strong id="cart-shipping">$0.00</strong>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-line total-line">
+              <span>Total Amount:</span>
+              <span class="total-price" id="cart-total">$0.00</span>
+            </div>
+          </div>
+
+          <!-- Checkout Form -->
+          <div class="card checkout-card" id="checkout-form-card">
+            <h3 class="card-title"><i class="fa-solid fa-credit-card"></i> Checkout Details</h3>
+            <form id="checkout-form" onsubmit="app.handleCheckout(event)">
+              <div class="form-group">
+                <label for="checkout-name"><i class="fa-solid fa-user"></i> Full Name *</label>
+                <input type="text" id="checkout-name" required placeholder="e.g. Alex Johnson" value="Alex Johnson">
+              </div>
+
+              <div class="form-group">
+                <label for="checkout-email"><i class="fa-solid fa-envelope"></i> Email Address *</label>
+                <input type="email" id="checkout-email" required placeholder="alex.johnson@example.com" value="alex.johnson@example.com">
+              </div>
+
+              <div class="form-group">
+                <label for="checkout-address"><i class="fa-solid fa-location-dot"></i> Shipping Address *</label>
+                <textarea id="checkout-address" rows="2" required placeholder="Street address, city, state, zip">442 Silicon Valley Blvd, San Jose, CA 95134</textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="checkout-payment"><i class="fa-solid fa-wallet"></i> Simulated Payment Method *</label>
+                <select id="checkout-payment" required>
+                  <option value="Credit Card" selected>Credit Card (Simulated 3D-Secure)</option>
+                  <option value="UPI">UPI (Unified Payments Interface)</option>
+                  <option value="PayPal">PayPal Sandbox</option>
+                  <option value="Cash on Delivery">Cash on Delivery (COD)</option>
+                </select>
+              </div>
+
+              <div class="simulation-note">
+                <i class="fa-solid fa-shield-halved"></i> Simulated Payment Gateway: No real credit card or money will be charged.
+              </div>
+
+              <button type="submit" class="btn btn-success btn-block" id="btn-submit-order">
+                <i class="fa-solid fa-lock"></i> <span>Place Order & Trigger Async Events</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- TAB 4: ORDERS & REAL-TIME TRACKING             -->
+    <!-- ============================================== -->
+    <section class="tab-pane" id="pane-orders">
+      <div class="section-header-row">
+        <div>
+          <h2><i class="fa-solid fa-truck-ramp-box"></i> Order History & Live Stage Tracking</h2>
+          <p class="section-desc">Track asynchronous order events as orders progress: PLACED → CONFIRMED → SHIPPED → DELIVERED.</p>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="app.loadOrders()">
+          <i class="fa-solid fa-arrows-rotate"></i> <span>Refresh Orders</span>
+        </button>
+      </div>
+
+      <!-- Active Tracking Viewer Card -->
+      <div class="card tracking-viewer-card" id="tracking-viewer-container" style="display:none;">
+        <div class="tracking-header">
+          <div>
+            <span class="tracking-order-badge" id="tracking-order-id">ORD-XXXXXX</span>
+            <h3 class="tracking-title" id="tracking-status-title">Current Status: PLACED</h3>
+            <p class="tracking-meta" id="tracking-customer-meta">Customer: Alex Johnson | Carrier: SwiftLogistics</p>
+          </div>
+          <div class="tracking-actions">
+            <button class="btn btn-primary btn-sm" id="btn-advance-stage" onclick="app.advanceCurrentOrderStage()">
+              <i class="fa-solid fa-forward-step"></i> <span>Advance Status (Viva Demo)</span>
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="app.closeTrackingViewer()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4-Stage Visual Progress Stepper -->
+        <div class="stepper-container" id="tracking-stepper">
+          <div class="step-item" id="step-PLACED">
+            <div class="step-circle"><i class="fa-solid fa-receipt"></i></div>
+            <div class="step-label">Placed</div>
+            <div class="step-time" id="time-PLACED">--</div>
+          </div>
+          <div class="step-line" id="line-1"></div>
+          <div class="step-item" id="step-CONFIRMED">
+            <div class="step-circle"><i class="fa-solid fa-box-check"></i></div>
+            <div class="step-label">Confirmed</div>
+            <div class="step-time" id="time-CONFIRMED">--</div>
+          </div>
+          <div class="step-line" id="line-2"></div>
+          <div class="step-item" id="step-SHIPPED">
+            <div class="step-circle"><i class="fa-solid fa-truck-fast"></i></div>
+            <div class="step-label">Shipped</div>
+            <div class="step-time" id="time-SHIPPED">--</div>
+          </div>
+          <div class="step-line" id="line-3"></div>
+          <div class="step-item" id="step-DELIVERED">
+            <div class="step-circle"><i class="fa-solid fa-house-chimney-check"></i></div>
+            <div class="step-label">Delivered</div>
+            <div class="step-time" id="time-DELIVERED">--</div>
+          </div>
+        </div>
+
+        <!-- Detailed Audit Timeline of Events -->
+        <div class="timeline-logs">
+          <h4><i class="fa-solid fa-clock-rotate-left"></i> Asynchronous Event Audit Trail</h4>
+          <div class="timeline-list" id="tracking-events-list">
+            <!-- Dynamically populated event nodes -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders List Table -->
+      <div class="data-table-container mt-4">
+        <table class="data-table" id="orders-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total Amount</th>
+              <th>Payment</th>
+              <th>Current Stage</th>
+              <th>Placed Date</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="orders-table-body">
+            <!-- Dynamic order rows -->
+          </tbody>
+        </table>
+        <div class="empty-state p-4" id="orders-empty-state" style="display:none;">
+          <i class="fa-solid fa-inbox empty-icon"></i>
+          <h3>No orders placed yet</h3>
+          <p>Add items to your cart and complete checkout to place an order.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- TAB 5: SYSTEM ARCHITECTURE (ROUND 3 HLD)       -->
+    <!-- ============================================== -->
+    <section class="tab-pane" id="pane-architecture">
+      <div class="section-header-row">
+        <div>
+          <h2><i class="fa-solid fa-network-wired"></i> Round 3: High-Level Design (HLD) Architecture</h2>
+          <p class="section-desc">Interactive system design model demonstrating client request routing, microservice layers, caching, and event-driven architecture.</p>
+        </div>
+        <button class="btn btn-outline-danger btn-sm" onclick="app.flushCache()">
+          <i class="fa-solid fa-broom"></i> <span>Flush In-Memory Cache</span>
+        </button>
+      </div>
+
+      <!-- Interactive SVG Architecture Diagram -->
+      <div class="card architecture-diagram-card">
+        <div class="diagram-header">
+          <h3><i class="fa-solid fa-diagram-project"></i> Architectural Component Flow</h3>
+          <span class="conceptual-legend">
+            <span class="legend-badge conceptual"><i class="fa-solid fa-circle-dot"></i> Conceptual / Simulated</span>
+            <span class="legend-badge implemented"><i class="fa-solid fa-check"></i> Implemented & Running</span>
+          </span>
+        </div>
+
+        <!-- SVG Architecture Diagram Representation -->
+        <div class="diagram-canvas">
+          <svg viewBox="0 0 1000 600" class="arch-svg" id="arch-svg-diagram">
+            <defs>
+              <linearGradient id="gradClient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3b82f6" />
+                <stop offset="100%" stop-color="#1d4ed8" />
+              </linearGradient>
+              <linearGradient id="gradLB" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#8b5cf6" />
+                <stop offset="100%" stop-color="#6d28d9" />
+              </linearGradient>
+              <linearGradient id="gradGateway" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#06b6d4" />
+                <stop offset="100%" stop-color="#0e7490" />
+              </linearGradient>
+              <linearGradient id="gradService" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1e293b" />
+                <stop offset="100%" stop-color="#0f172a" />
+              </linearGradient>
+              <linearGradient id="gradDb" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#047857" />
+              </linearGradient>
+              <linearGradient id="gradCache" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f59e0b" />
+                <stop offset="100%" stop-color="#b45309" />
+              </linearGradient>
+              <linearGradient id="gradQueue" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ec4899" />
+                <stop offset="100%" stop-color="#be185d" />
+              </linearGradient>
+              
+              <!-- Arrow Marker -->
+              <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+              </marker>
+              <marker id="arrow-green" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981"/>
+              </marker>
+              <marker id="arrow-pink" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#ec4899"/>
+              </marker>
+            </defs>
+
+            <!-- CONNECTIONS / FLOW LINES -->
+            <!-- Client to Load Balancer -->
+            <path d="M 120 180 L 120 230" stroke="#64748b" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)"/>
+            
+            <!-- Load Balancer to API Gateway -->
+            <path d="M 120 300 L 120 350" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+            <!-- API Gateway to Service Tier 1 -->
+            <path d="M 200 385 L 290 100" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+            <path d="M 200 385 L 290 190" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+            <path d="M 200 385 L 290 280" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+            <path d="M 200 385 L 290 370" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+            <!-- Services to Database Tier -->
+            <path d="M 470 100 L 760 180" stroke="#10b981" stroke-width="2" marker-end="url(#arrow-green)"/>
+            <path d="M 470 280 L 760 200" stroke="#10b981" stroke-width="2" marker-end="url(#arrow-green)"/>
+            
+            <!-- Product Service to Cache -->
+            <path d="M 470 115 L 760 90" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3" marker-end="url(#arrow)"/>
+
+            <!-- Order Service to Event Queue -->
+            <path d="M 470 295 L 760 480" stroke="#ec4899" stroke-width="2" marker-end="url(#arrow-pink)"/>
+
+            <!-- Event Queue to Subscribers -->
+            <path d="M 760 500 L 470 460" stroke="#ec4899" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow-pink)"/>
+            <path d="M 760 520 L 470 540" stroke="#ec4899" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow-pink)"/>
+
+            <!-- NODES -->
+
+            <!-- 1. Customer Client -->
+            <g class="node-box" transform="translate(40, 110)">
+              <rect width="160" height="70" rx="8" fill="url(#gradClient)" stroke="#60a5fa" stroke-width="1.5"/>
+              <text x="80" y="38" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="14">Customer Client</text>
+              <text x="80" y="55" text-anchor="middle" fill="#dbeafe" font-size="11">Browser (HTML/CSS/JS)</text>
+            </g>
+
+            <!-- 2. Load Balancer (Conceptual) -->
+            <g class="node-box" transform="translate(40, 230)">
+              <rect width="160" height="70" rx="8" fill="url(#gradLB)" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4"/>
+              <text x="80" y="35" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="13">Load Balancer</text>
+              <text x="80" y="52" text-anchor="middle" fill="#e9d5ff" font-size="10">(Conceptual / Nginx)</text>
+            </g>
+
+            <!-- 3. API Gateway -->
+            <g class="node-box" transform="translate(40, 350)">
+              <rect width="160" height="75" rx="8" fill="url(#gradGateway)" stroke="#22d3ee" stroke-width="1.5"/>
+              <text x="80" y="32" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="13">API Gateway</text>
+              <text x="80" y="48" text-anchor="middle" fill="#cffafe" font-size="10">Express Route Dispatcher</text>
+              <text x="80" y="63" text-anchor="middle" fill="#cffafe" font-size="9">Req-ID, Auth, Rate Limits</text>
+            </g>
+
+            <!-- SERVICES TIER -->
+            <!-- Product Service -->
+            <g class="node-box" transform="translate(290, 65)">
+              <rect width="180" height="65" rx="6" fill="#1e293b" stroke="#6366f1" stroke-width="1.5"/>
+              <text x="90" y="28" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="12">1. Product Service</text>
+              <text x="90" y="46" text-anchor="middle" fill="#94a3b8" font-size="10">Catalog CRUD & Filtering</text>
+            </g>
+
+            <!-- Cart Service -->
+            <g class="node-box" transform="translate(290, 155)">
+              <rect width="180" height="65" rx="6" fill="#1e293b" stroke="#6366f1" stroke-width="1.5"/>
+              <text x="90" y="28" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="12">2. Cart Service</text>
+              <text x="90" y="46" text-anchor="middle" fill="#94a3b8" font-size="10">Cart Items & Total Calc</text>
+            </g>
+
+            <!-- Order Service -->
+            <g class="node-box" transform="translate(290, 245)">
+              <rect width="180" height="65" rx="6" fill="#1e293b" stroke="#6366f1" stroke-width="1.5"/>
+              <text x="90" y="28" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="12">3. Order Service</text>
+              <text x="90" y="46" text-anchor="middle" fill="#94a3b8" font-size="10">Checkout & Orchestration</text>
+            </g>
+
+            <!-- Payment Service -->
+            <g class="node-box" transform="translate(290, 335)">
+              <rect width="180" height="65" rx="6" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="3"/>
+              <text x="90" y="28" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="12">4. Payment Service</text>
+              <text x="90" y="46" text-anchor="middle" fill="#a78bfa" font-size="10">Simulated Gateway</text>
+            </g>
+
+            <!-- Inventory Service -->
+            <g class="node-box" transform="translate(290, 425)">
+              <rect width="180" height="65" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+              <text x="90" y="28" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="12">5. Inventory Service</text>
+              <text x="90" y="46" text-anchor="middle" fill="#6ee7b7" font-size="10">Stock Reservation Logic</text>
+            </g>
+
+            <!-- Delivery & Tracking Service -->
+            <g class="node-box" transform="translate(290, 505)">
+              <rect width="180" height="65" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+              <text x="90" y="28" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="12">6. Delivery & Tracking</text>
+              <text x="90" y="46" text-anchor="middle" fill="#93c5fd" font-size="10">Async Stage Progression</text>
+            </g>
+
+            <!-- Notification Service (Subscribed to Queue) -->
+            <g class="node-box" transform="translate(520, 505)">
+              <rect width="180" height="65" rx="6" fill="#1e293b" stroke="#f43f5e" stroke-width="1.5"/>
+              <text x="90" y="28" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="12">7. Notification Service</text>
+              <text x="90" y="46" text-anchor="middle" fill="#fda4af" font-size="10">Simulated Email / SMS</text>
+            </g>
+
+            <!-- DATA & INFRASTRUCTURE TIER -->
+            <!-- In-Memory Cache -->
+            <g class="node-box" transform="translate(760, 60)">
+              <rect width="200" height="75" rx="8" fill="url(#gradCache)" stroke="#fbbf24" stroke-width="1.5"/>
+              <text x="100" y="32" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="13">In-Memory Cache</text>
+              <text x="100" y="50" text-anchor="middle" fill="#fef3c7" font-size="10">TTL & Key-Value Store</text>
+              <text x="100" y="65" text-anchor="middle" fill="#fef3c7" font-size="9">Hit/Miss Metrics Tracking</text>
+            </g>
+
+            <!-- SQLite Database -->
+            <g class="node-box" transform="translate(760, 165)">
+              <rect width="200" height="85" rx="8" fill="url(#gradDb)" stroke="#34d399" stroke-width="1.5"/>
+              <text x="100" y="34" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="14">SQLite Database</text>
+              <text x="100" y="52" text-anchor="middle" fill="#d1fae5" font-size="10">ecommerce.db (Persistent)</text>
+              <text x="100" y="68" text-anchor="middle" fill="#d1fae5" font-size="9">Products, Orders, Events</text>
+            </g>
+
+            <!-- Event Queue -->
+            <g class="node-box" transform="translate(760, 455)">
+              <rect width="200" height="85" rx="8" fill="url(#gradQueue)" stroke="#f472b6" stroke-width="1.5"/>
+              <text x="100" y="32" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="13">Async Event Queue</text>
+              <text x="100" y="48" text-anchor="middle" fill="#fce7f3" font-size="10">Simulating Kafka / RabbitMQ</text>
+              <text x="100" y="64" text-anchor="middle" fill="#fce7f3" font-size="9">Pub/Sub Order Event Broker</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Service Architecture Breakdown Cards -->
+      <div class="hld-details-grid mt-4">
+        <div class="card service-card">
+          <div class="service-card-header">
+            <span class="service-num">01</span>
+            <h4>Product Service</h4>
+            <span class="badge badge-success">Implemented</span>
+          </div>
+          <p>Encapsulates catalog management. Interacts with SQLite for persistent storage and the In-Memory Cache layer to serve reads rapidly without hitting disk.</p>
+          <ul class="service-features">
+            <li><i class="fa-solid fa-check"></i> REST CRUD endpoints (`/api/products`)</li>
+            <li><i class="fa-solid fa-check"></i> Search and category filtering</li>
+            <li><i class="fa-solid fa-check"></i> Automatic cache eviction on write/delete</li>
+          </ul>
+        </div>
+
+        <div class="card service-card">
+          <div class="service-card-header">
+            <span class="service-num">02</span>
+            <h4>Cart & Inventory Services</h4>
+            <span class="badge badge-success">Implemented</span>
+          </div>
+          <p>Maintains user shopping sessions, verifies stock availability against inventory, and prevents race conditions with atomic stock deductions.</p>
+          <ul class="service-features">
+            <li><i class="fa-solid fa-check"></i> Live stock quantity verification</li>
+            <li><i class="fa-solid fa-check"></i> Atomic inventory reservation</li>
+            <li><i class="fa-solid fa-check"></i> Subtotal, tax, and total calculation</li>
+          </ul>
+        </div>
+
+        <div class="card service-card">
+          <div class="service-card-header">
+            <span class="service-num">03</span>
+            <h4>Order & Payment Services</h4>
+            <span class="badge badge-success">Implemented</span>
+          </div>
+          <p>Orchestrates transaction workflow: validates customer payload, authorizes simulated payment, reserves inventory, creates order, and dispatches events.</p>
+          <ul class="service-features">
+            <li><i class="fa-solid fa-check"></i> Simulated Payment Gateway</li>
+            <li><i class="fa-solid fa-check"></i> Atomic multi-table SQLite inserts</li>
+            <li><i class="fa-solid fa-check"></i> Asynchronous event generation</li>
+          </ul>
+        </div>
+
+        <div class="card service-card">
+          <div class="service-card-header">
+            <span class="service-num">04</span>
+            <h4>Delivery & Notification Services</h4>
+            <span class="badge badge-success">Implemented</span>
+          </div>
+          <p>Event-driven subscribers. Delivery Service updates order stages asynchronously over time; Notification Service sends simulated email and SMS receipts.</p>
+          <ul class="service-features">
+            <li><i class="fa-solid fa-check"></i> 4-Stage State Machine (PLACED → DELIVERED)</li>
+            <li><i class="fa-solid fa-check"></i> Audit trail in `order_events` table</li>
+            <li><i class="fa-solid fa-check"></i> Simulated customer alerts & logs</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Live Telemetry Monitor (Cache + Queue + Notifications) -->
+      <div class="telemetry-grid mt-4">
+        <!-- Cache Stats Box -->
+        <div class="card">
+          <h3 class="card-title"><i class="fa-solid fa-microchip"></i> Live In-Memory Cache Monitor</h3>
+          <div class="telemetry-stats-rows">
+            <div class="t-row">
+              <span>Cache Hits:</span>
+              <strong class="text-success" id="tel-cache-hits">0</strong>
+            </div>
+            <div class="t-row">
+              <span>Cache Misses:</span>
+              <strong class="text-warning" id="tel-cache-misses">0</strong>
+            </div>
+            <div class="t-row">
+              <span>Cached Keys Count:</span>
+              <strong id="tel-cache-keys">0</strong>
+            </div>
+            <div class="t-row">
+              <span>Hit Ratio:</span>
+              <strong class="text-info" id="tel-cache-ratio">0.0%</strong>
+            </div>
+          </div>
+          <button class="btn btn-outline-danger btn-sm mt-3" onclick="app.flushCache()">
+            <i class="fa-solid fa-trash"></i> Flush Cache Now
+          </button>
+        </div>
+
+        <!-- Event Queue Monitor -->
+        <div class="card">
+          <h3 class="card-title"><i class="fa-solid fa-timeline"></i> Event Queue Telemetry</h3>
+          <div class="telemetry-stats-rows">
+            <div class="t-row">
+              <span>Processed Events:</span>
+              <strong id="tel-queue-processed">0</strong>
+            </div>
+            <div class="t-row">
+              <span>Pending Asynchronous Jobs:</span>
+              <strong id="tel-queue-pending">0</strong>
+            </div>
+          </div>
+          <h5 class="mt-3 mb-2 font-mono text-muted">Recent Dispatched Events:</h5>
+          <div class="queue-events-list" id="tel-recent-events">
+            <!-- Event stream items -->
+          </div>
+        </div>
+
+        <!-- Notification Dispatcher Log -->
+        <div class="card">
+          <h3 class="card-title"><i class="fa-solid fa-bell"></i> Simulated Notifications</h3>
+          <div class="notifications-stream" id="tel-notifications-stream">
+            <!-- Notification messages -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- TAB 6: API DOCUMENTATION & PLAYGROUND          -->
+    <!-- ============================================== -->
+    <section class="tab-pane" id="pane-apidocs">
+      <div class="section-header-row">
+        <div>
+          <h2><i class="fa-solid fa-terminal"></i> Interactive API Documentation & REST Console</h2>
+          <p class="section-desc">Test all Low-Level Design (LLD) endpoints with live JSON response preview and curl commands.</p>
+        </div>
+      </div>
+
+      <div class="api-docs-layout">
+        <!-- Endpoint list left panel -->
+        <div class="api-endpoints-column">
+          <div class="api-category-title">Product Service APIs</div>
+
+          <div class="api-item" onclick="app.selectApiEndpoint('GET_PRODUCTS')">
+            <span class="http-badge get">GET</span>
+            <span class="api-path">/api/products</span>
+          </div>
+          <div class="api-item" onclick="app.selectApiEndpoint('GET_PRODUCT_ID')">
+            <span class="http-badge get">GET</span>
+            <span class="api-path">/api/products/:id</span>
+          </div>
+          <div class="api-item" onclick="app.selectApiEndpoint('POST_PRODUCT')">
+            <span class="http-badge post">POST</span>
+            <span class="api-path">/api/products</span>
+          </div>
+          <div class="api-item" onclick="app.selectApiEndpoint('PUT_PRODUCT')">
+            <span class="http-badge put">PUT</span>
+            <span class="api-path">/api/products/:id</span>
+          </div>
+          <div class="api-item" onclick="app.selectApiEndpoint('DELETE_PRODUCT')">
+            <span class="http-badge delete">DELETE</span>
+            <span class="api-path">/api/products/:id</span>
+          </div>
+
+          <div class="api-category-title mt-3">Cart Service APIs</div>
+          <div class="api-item" onclick="app.selectApiEndpoint('GET_CART')">
+            <span class="http-badge get">GET</span>
+            <span class="api-path">/api/cart</span>
+          </div>
+          <div class="api-item" onclick="app.selectApiEndpoint('POST_CART_ITEM')">
+            <span class="http-badge post">POST</span>
+            <span class="api-path">/api/cart/items</span>
+          </div>
+
+          <div class="api-category-title mt-3">Order & Tracking APIs</div>
+          <div class="api-item" onclick="app.selectApiEndpoint('POST_ORDER')">
+            <span class="http-badge post">POST</span>
+            <span class="api-path">/api/orders</span>
+          </div>
+          <div class="api-item" onclick="app.selectApiEndpoint('GET_ORDERS')">
+            <span class="http-badge get">GET</span>
+            <span class="api-path">/api/orders</span>
+          </div>
+          <div class="api-item" onclick="app.selectApiEndpoint('GET_TRACKING')">
+            <span class="http-badge get">GET</span>
+            <span class="api-path">/api/orders/:id/tracking</span>
+          </div>
+          <div class="api-item" onclick="app.selectApiEndpoint('POST_ADVANCE_ORDER')">
+            <span class="http-badge post">POST</span>
+            <span class="api-path">/api/orders/:id/advance</span>
+          </div>
+
+          <div class="api-category-title mt-3">System & Telemetry APIs</div>
+          <div class="api-item" onclick="app.selectApiEndpoint('GET_STATS')">
+            <span class="http-badge get">GET</span>
+            <span class="api-path">/api/system/stats</span>
+          </div>
+        </div>
+
+        <!-- Interactive Playground Right Panel -->
+        <div class="api-tester-column">
+          <div class="card api-console-card">
+            <div class="console-header">
+              <div class="console-endpoint-title">
+                <span class="http-badge" id="tester-method-badge">GET</span>
+                <span class="tester-url" id="tester-url-display">/api/products</span>
+              </div>
+              <button class="btn btn-primary btn-sm" id="btn-execute-api" onclick="app.executeSelectedApi()">
+                <i class="fa-solid fa-play"></i> <span>Send Request</span>
+              </button>
+            </div>
+
+            <p class="api-doc-description" id="tester-description">Fetches all products from SQLite with in-memory caching and optional search.</p>
+
+            <!-- Request Body editor (for POST/PUT) -->
+            <div class="tester-section" id="tester-payload-section" style="display:none;">
+              <label class="form-label"><i class="fa-solid fa-file-code"></i> Request JSON Body:</label>
+              <textarea class="code-editor" id="tester-request-body" rows="6"></textarea>
+            </div>
+
+            <!-- Parameters editor (for :id or query params) -->
+            <div class="tester-section" id="tester-params-section">
+              <label class="form-label"><i class="fa-solid fa-sliders"></i> URL Parameters / Query String:</label>
+              <input type="text" class="input-control" id="tester-url-params" placeholder="e.g. ?q=headphones or 1">
+            </div>
+
+            <!-- Response preview -->
+            <div class="tester-section">
+              <div class="response-status-bar">
+                <span>Response:</span>
+                <span class="response-code" id="tester-response-status">Status: Waiting</span>
+                <span class="response-time" id="tester-response-time">Time: -- ms</span>
+                <span class="response-source" id="tester-response-source"></span>
+              </div>
+              <pre class="response-output" id="tester-response-json">// Click "Send Request" to test this endpoint</pre>
+            </div>
+
+            <!-- Equivalent cURL Snippet -->
+            <div class="tester-section">
+              <label class="form-label"><i class="fa-solid fa-terminal"></i> Equivalent cURL Command:</label>
+              <pre class="curl-snippet" id="tester-curl-command">curl -X GET http://localhost:3000/api/products</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD / EDIT PRODUCT                      -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop" id="product-modal-backdrop" style="display:none;" onclick="app.closeProductModal(event)">
+    <div class="modal-dialog" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="product-modal-title"><i class="fa-solid fa-box-open"></i> Add New Product</h3>
+        <button class="modal-close-btn" onclick="app.closeProductModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="product-form" onsubmit="app.handleSaveProduct(event)">
+        <input type="hidden" id="product-form-id" value="">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="prod-name">Product Name *</label>
+            <input type="text" id="prod-name" required placeholder="e.g. Sony WH-1000XM5">
+          </div>
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="prod-category">Category *</label>
+              <input type="text" id="prod-category" required placeholder="e.g. Electronics" list="category-datalist">
+              <datalist id="category-datalist">
+                <option value="Electronics">
+                <option value="Fashion">
+                <option value="Home & Kitchen">
+                <option value="Books">
+                <option value="Fitness">
+              </datalist>
+            </div>
+            <div class="form-group col-3">
+              <label for="prod-price">Price ($) *</label>
+              <input type="number" id="prod-price" required step="0.01" min="0.01" placeholder="29.99">
+            </div>
+            <div class="form-group col-3">
+              <label for="prod-stock">Stock *</label>
+              <input type="number" id="prod-stock" required min="0" step="1" placeholder="10">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="prod-image">Image URL</label>
+            <input type="url" id="prod-image" placeholder="https://images.unsplash.com/...">
+          </div>
+          <div class="form-group">
+            <label for="prod-description">Product Description</label>
+            <textarea id="prod-description" rows="3" placeholder="Detailed product specifications..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeProductModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-product">
+            <i class="fa-solid fa-floppy-disk"></i> Save Product
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p><strong>ShopSphere</strong> – Online Shopping Platform for LLD & HLD Practical Examination</p>
+      <p class="footer-subtext">Node.js • Express.js • SQLite • In-Memory Cache • Async Event Queue</p>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

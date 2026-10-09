@@ -1,0 +1,26 @@
+{
+  "name": "online-shopping-platform",
+  "version": "1.0.0",
+  "description": "Online Shopping Platform - Low-Level Design (LLD) & High-Level Design (HLD) College Project",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "system-design",
+    "lld",
+    "hld",
+    "express",
+    "sqlite",
+    "ecommerce"
+  ],
+  "author": "Student Project",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "morgan": "^1.10.0",
+    "sql.js": "^1.12.0"
+  }
+}
