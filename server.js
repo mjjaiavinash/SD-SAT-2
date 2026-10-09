@@ -57,8 +57,8 @@ async function startServer() {
     await db.initDatabase();
     app.listen(PORT, () => {
       console.log('====================================================');
-      console.log(`🛍️  Online Shopping Platform running at:`);
-      console.log(`👉  http://localhost:${PORT}`);
+      console.log(`[ShopSphere] Online Shopping Platform running at:`);
+      console.log(`  http://localhost:${PORT}`);
       console.log('====================================================');
       console.log(`Logical Services Initialized:`);
       console.log(`  1. Product Service (SQLite + In-Memory Cache)`);

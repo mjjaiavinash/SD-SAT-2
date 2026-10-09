@@ -5,16 +5,16 @@ async function runTestSuite() {
 
   function assert(condition, message) {
     if (condition) {
-      console.log(`  ✅ PASS: ${message}`);
+      console.log(`  [PASS] ${message}`);
       passed++;
     } else {
-      console.error(`  ❌ FAIL: ${message}`);
+      console.error(`  [FAIL] ${message}`);
       failed++;
     }
   }
 
   console.log('====================================================');
-  console.log('🧪 RUNNING SYSTEM DESIGN END-TO-END TEST SUITE');
+  console.log('RUNNING SYSTEM DESIGN END-TO-END TEST SUITE');
   console.log('====================================================\n');
 
   // Test 1: GET /api/products
@@ -195,7 +195,7 @@ async function runTestSuite() {
   }
 
   console.log('\n====================================================');
-  console.log(`🏁 TEST SUITE SUMMARY: ${passed} PASSED, ${failed} FAILED`);
+  console.log(`TEST SUITE SUMMARY: ${passed} PASSED, ${failed} FAILED`);
   console.log('====================================================');
 }
 

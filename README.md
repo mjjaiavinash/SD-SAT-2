@@ -1,4 +1,4 @@
-# 🛍️ ShopSphere – Online Shopping Platform
+# ShopSphere - Online Shopping Platform
 ### Low-Level Design (LLD) & High-Level Design (HLD) Practical Examination Project
 
 ShopSphere is a beginner-friendly, fully functional **Online Shopping Platform** developed for college **Low-Level Design (LLD)** and **High-Level Design (HLD)** practical and viva examinations.
@@ -7,7 +7,7 @@ It features a responsive frontend, a modular Node.js/Express backend, persistent
 
 ---
 
-## 📌 Project Overview & Architecture
+## Project Overview & Architecture
 
 ### High-Level Design (HLD) Architecture Flow
 
@@ -45,7 +45,7 @@ It features a responsive frontend, a modular Node.js/Express backend, persistent
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 online-shopping/
@@ -81,7 +81,7 @@ online-shopping/
 
 ---
 
-## 🚀 Installation & Execution
+## Installation & Execution
 
 ### 1. Prerequisites
 - **Node.js** (v18, v20, v22, or higher)
@@ -106,11 +106,11 @@ node server.js
 
 ### 4. Local URL
 Open your browser and navigate to:
-👉 **[http://localhost:3000](http://localhost:3000)**
+**http://localhost:3000**
 
 ---
 
-## 🧪 Running Automated Tests
+## Running Automated Tests
 
 A complete automated test suite is included to verify all REST endpoints, status codes, and service integrations:
 ```bash
@@ -119,31 +119,31 @@ node test_suite.js
 Expected output:
 ```text
 ====================================================
-🧪 RUNNING SYSTEM DESIGN END-TO-END TEST SUITE
+RUNNING SYSTEM DESIGN END-TO-END TEST SUITE
 ====================================================
-  ✅ PASS: GET /api/products returned 12 products
-  ✅ PASS: Search GET /api/products?q=Sony found 1 products
-  ✅ PASS: GET /api/products/1 returned product: "Sony WH-1000XM5 Noise Canceling Headphones"
-  ✅ PASS: POST /api/products created product #13
-  ✅ PASS: PUT /api/products/13 updated price to $179.99
-  ✅ PASS: DELETE /api/products/13 deleted product successfully
-  ✅ PASS: POST /api/cart/items added 2 units of product #1 to cart
-  ✅ PASS: GET /api/cart total calculated: $755.98
-  ✅ PASS: POST /api/orders placed order #ORD-XXXXXX for $755.98
-  ✅ PASS: GET /api/orders returned orders list
-  ✅ PASS: GET /api/orders/ORD-XXXXXX/tracking status: PLACED
-  ✅ PASS: POST /api/orders/ORD-XXXXXX/advance moved stage to: CONFIRMED
-  ✅ PASS: GET /api/system/stats returned cache metrics
-  ✅ PASS: Error handling test: GET /api/products/99999 returned 404 Not Found
-  ✅ PASS: Validation test: POST /api/products with empty name returned 400 Bad Request
+  [PASS] GET /api/products returned 12 products
+  [PASS] Search GET /api/products?q=Sony found 1 products
+  [PASS] GET /api/products/1 returned product: "Sony WH-1000XM5 Noise Canceling Headphones"
+  [PASS] POST /api/products created product #13
+  [PASS] PUT /api/products/13 updated price to $179.99
+  [PASS] DELETE /api/products/13 deleted product successfully
+  [PASS] POST /api/cart/items added 2 units of product #1 to cart
+  [PASS] GET /api/cart total calculated: $755.98
+  [PASS] POST /api/orders placed order #ORD-XXXXXX for $755.98
+  [PASS] GET /api/orders returned orders list
+  [PASS] GET /api/orders/ORD-XXXXXX/tracking status: PLACED
+  [PASS] POST /api/orders/ORD-XXXXXX/advance moved stage to: CONFIRMED
+  [PASS] GET /api/system/stats returned cache metrics
+  [PASS] Error handling test: GET /api/products/99999 returned 404 Not Found
+  [PASS] Validation test: POST /api/products with empty name returned 400 Bad Request
 ====================================================
-🏁 TEST SUITE SUMMARY: 15 PASSED, 0 FAILED
+TEST SUITE SUMMARY: 15 PASSED, 0 FAILED
 ====================================================
 ```
 
 ---
 
-## 📡 REST API Documentation & Postman Testing
+## REST API Documentation & Postman Testing
 
 All endpoints route through the Express API Gateway and return standardized JSON responses.
 
@@ -223,7 +223,7 @@ All endpoints route through the Express API Gateway and return standardized JSON
 
 ---
 
-## 🎓 How the Project Covers LLD & HLD (Examination Guide)
+## How the Project Covers LLD & HLD (Examination Guide)
 
 ### Round 2: Low-Level Design (LLD)
 1. **CRUD Data Access**: Implemented in [productService.js](file:///c:/Users/HS/Downloads/System%20Design%20Application/services/productService.js) using SQLite SQL queries with parameterized statements preventing SQL injection.
@@ -263,13 +263,13 @@ All endpoints route through the Express API Gateway and return standardized JSON
 
 ---
 
-## 🖥️ Live Demonstration Steps (For Practical Exam)
+## Live Demonstration Steps (For Practical Exam)
 
 1. **Storefront & Search**:
    - Open `http://localhost:3000`.
    - Type `MacBook` into the search bar to demonstrate instant, debounced product search.
    - Filter by categories (`Electronics`, `Fashion`, `Books`) to show categorized catalog querying.
-   - Observe the **Cache Indicator Banner**: 1st request shows `CACHE MISS / DB QUERY`; refreshing immediately shows `CACHE HIT`!
+   - Observe the **Cache Indicator Banner**: 1st request shows `CACHE MISS / DB QUERY`; refreshing immediately shows `CACHE HIT`.
 2. **Product CRUD**:
    - Click **Product CRUD** tab in the navigation.
    - Click **Add New Product**, fill the form, and save to show SQLite insertion.
@@ -293,5 +293,5 @@ All endpoints route through the Express API Gateway and return standardized JSON
 
 ---
 
-## 🔒 License & Academic Integrity
+## License & Academic Integrity
 Created for educational purposes and college system design practical examinations. Free to use, modify, and present.
